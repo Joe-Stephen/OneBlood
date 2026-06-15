@@ -1,7 +1,10 @@
 // ─── Infrastructure ───────────────────────────────────────────────────────────
-import { DbClient }       from '@infrastructure/database/db.client';
-import { RedisCache }     from '@infrastructure/redis/redis.cache';
-import { RedisPubSub }    from '@infrastructure/redis/redis.pubsub';
+import { DbClient }          from '@infrastructure/database/db.client';
+import { RedisCache }        from '@infrastructure/redis/redis.cache';
+import { RedisPubSub }       from '@infrastructure/redis/redis.pubsub';
+import { NodemailerAdapter } from '@infrastructure/messaging/nodemailer.adapter';
+// import { TwilioAdapter } from '@infrastructure/messaging/twilio.adapter'; // uncomment to switch to SMS
+import { OtpService }        from '@infrastructure/messaging/otp.service';
 
 // ─── Core ─────────────────────────────────────────────────────────────────────
 import { MatchingEngine } from '@core/matching/matching.engine';
@@ -48,6 +51,11 @@ import { createAdminRoutes }         from '@modules/admin/admin.routes';
 const db     = new DbClient();
 const cache  = new RedisCache();
 const pubsub = new RedisPubSub();
+
+// Messaging (swap NodemailerAdapter → TwilioAdapter when Twilio is configured)
+const messageSender = new NodemailerAdapter();
+// const messageSender = new TwilioAdapter();
+const otpService    = new OtpService(messageSender, cache);
 
 // Core
 const matchingEngine = new MatchingEngine(db, cache, pubsub);

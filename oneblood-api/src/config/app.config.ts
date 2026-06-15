@@ -14,9 +14,20 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_REDIRECT_URI:  z.string().default('http://localhost:3001/api/auth/callback'),
   GOOGLE_MAPS_API_KEY:  z.string().default(''),
+
+  // ── SMTP (Nodemailer — active) ─────────────────────────────────────────────
+  SMTP_HOST:  z.string().default('smtp.gmail.com'),
+  SMTP_PORT:  z.coerce.number().default(587),
+  SMTP_USER:  z.string().default(''),
+  SMTP_PASS:  z.string().default(''),
+  SMTP_FROM:  z.string().default('noreply@oneblood.in'),
+
+  // ── Twilio SMS (stubbed — fill when ready) ────────────────────────────────
   TWILIO_ACCOUNT_SID:   z.string().default(''),
   TWILIO_AUTH_TOKEN:    z.string().default(''),
   TWILIO_PHONE_NUMBER:  z.string().default(''),
+
+  // ── Firebase FCM ──────────────────────────────────────────────────────────
   FIREBASE_PROJECT_ID:  z.string().default(''),
   FIREBASE_PRIVATE_KEY: z.string().default(''),
   FIREBASE_CLIENT_EMAIL:z.string().default(''),
