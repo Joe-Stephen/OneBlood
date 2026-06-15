@@ -1,0 +1,17 @@
+{
+  "name": "oneblood",
+  "version": "1.0.0",
+  "description": "OneBlood — Blood Donation Platform (monorepo root)",
+  "private": true,
+  "scripts": {
+    "dev":      "concurrently --names \"API,WEB\" --prefix-colors \"red,blue\" \"npm run dev --prefix oneblood-api\" \"npm run dev --prefix oneblood-web\"",
+    "dev:api":  "npm run dev --prefix oneblood-api",
+    "dev:web":  "npm run dev --prefix oneblood-web",
+    "build":    "npm run build --prefix oneblood-api && npm run build --prefix oneblood-web",
+    "lint":     "npm run lint --prefix oneblood-api && npm run lint --prefix oneblood-web",
+    "typecheck":"npm run typecheck --prefix oneblood-api && npx tsc --noEmit --prefix oneblood-web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

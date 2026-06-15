@@ -28,11 +28,24 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [form, setForm] = useState<FormState>({
     name: '', phone: '', bloodType: 'O_POS',
     weightKg: 65, dateOfBirth: '',
     city: '', state: '', lat: '', lon: '',
   });
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/v1/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {}
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
 
   const update = (key: keyof FormState, val: string | number) =>
     setForm(f => ({ ...f, [key]: val }));
@@ -56,9 +69,28 @@ export default function OnboardingPage() {
   return (
     <div style={{
       minHeight: '100vh', background: 'var(--surface-0)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '40px 24px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '40px 24px', position: 'relative'
     }}>
+      {/* Top Bar for Logout */}
+      <div style={{
+        position: 'absolute', top: 20, right: 24, display: 'flex', alignItems: 'center', gap: 12
+      }}>
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="btn btn-ghost btn-sm"
+          style={{
+            color: '#f87171',
+            border: '1px solid rgba(239,68,68,0.3)',
+            opacity: isLoggingOut ? 0.6 : 1,
+            cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isLoggingOut ? '...' : '⏻ Logout'}
+        </button>
+      </div>
+
       <div style={{ width: '100%', maxWidth: 560 }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>

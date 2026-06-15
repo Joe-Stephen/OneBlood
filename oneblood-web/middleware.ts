@@ -31,19 +31,16 @@ export function middleware(req: NextRequest) {
   const isAuthOnly      = AUTH_ONLY_PATTERNS.some(p => p.test(pathname));
   const isAdminRoute    = ADMIN_ONLY_PATTERNS.some(p => p.test(pathname));
 
-  // Redirect unauthenticated users away from protected routes
   if (isProtected && !isAuthenticated) {
     const loginUrl = new URL('/login', req.url);
     loginUrl.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated users away from login
   if (isAuthOnly && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
-  // Guard admin routes
   if (isAdminRoute && isAuthenticated && userRole !== 'ADMIN') {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
@@ -52,7 +49,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|public).*)'],
 };

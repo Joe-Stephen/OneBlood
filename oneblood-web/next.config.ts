@@ -28,13 +28,8 @@ const nextConfig: NextConfig = {
   // Images
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'lh3.googleusercontent.com' }, // Google profile photos
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
-  },
-
-  // Experimental
-  experimental: {
-    typedRoutes: false,
   },
 };
 

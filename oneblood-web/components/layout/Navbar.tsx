@@ -1,7 +1,29 @@
 'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function Navbar({ userName, userRole }: { userName: string; userRole: string }) {
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      // Call backend to blacklist the token
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/v1/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Continue even if API call fails
+    }
+
+    // Clear cookies via the frontend API route
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
+
   return (
     <header style={{
       height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -28,6 +50,19 @@ export function Navbar({ userName, userRole }: { userName: string; userRole: str
         <Link href="/profile" className="btn btn-secondary btn-sm">
           Profile
         </Link>
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="btn btn-ghost btn-sm"
+          style={{
+            color: '#f87171',
+            border: '1px solid rgba(239,68,68,0.3)',
+            opacity: loggingOut ? 0.6 : 1,
+            cursor: loggingOut ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {loggingOut ? '...' : '⏻ Logout'}
+        </button>
       </div>
     </header>
   );

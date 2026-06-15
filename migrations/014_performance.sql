@@ -71,23 +71,20 @@ ALTER TABLE notifications
 -- ANALYZE donor_profiles;
 -- (Commented out: must be run manually during maintenance window)
 
--- ============================================================
--- Partial index — recently donated (last 6 months)
--- Used by analytics: "active donor" definition
--- ============================================================
+-- Partial index — donated since 2025 (static cutoff — update yearly if needed)
+-- PostgreSQL requires IMMUTABLE expressions in index predicates; NOW() is not IMMUTABLE.
 CREATE INDEX idx_donations_recent
   ON donations(donor_id, donated_at DESC)
-  WHERE donated_at >= NOW() - INTERVAL '6 months';
+  WHERE donated_at >= '2025-01-01';
 
--- ============================================================
 -- Expression index — year/month for analytics grouping
--- ============================================================
+-- DATE_TRUNC with a timestamp literal is fine; the column reference makes it IMMUTABLE-safe
 CREATE INDEX idx_donations_month
-  ON donations(DATE_TRUNC('month', donated_at));
+  ON donations( (donated_at::date) );
 
 CREATE INDEX idx_blood_requests_month
-  ON blood_requests(DATE_TRUNC('month', created_at));
+  ON blood_requests( (created_at::date) );
 
-COMMENT ON INDEX idx_donations_recent      IS 'Supports "active donor in last 6 months" analytics queries';
-COMMENT ON INDEX idx_donations_month       IS 'Supports monthly donation count analytics';
-COMMENT ON INDEX idx_blood_requests_month  IS 'Supports monthly request count analytics';
+COMMENT ON INDEX idx_donations_recent      IS 'Supports "active donor" analytics queries (cutoff 2025-01-01)';
+COMMENT ON INDEX idx_donations_month       IS 'Supports daily/monthly donation count analytics';
+COMMENT ON INDEX idx_blood_requests_month  IS 'Supports daily/monthly request count analytics';
