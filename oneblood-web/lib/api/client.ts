@@ -47,7 +47,12 @@ async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
     throw new ApiError(err.error.code, err.error.message, res.status, err.error.details);
   }
 
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return {} as T;
+  }
+
+  const text = await res.text();
+  return (text ? JSON.parse(text) : {}) as T;
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────

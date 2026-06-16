@@ -1,6 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
+import { usersApi, donorsApi } from '@/lib/api/client';
 
 const BLOOD_TYPES = ['O_POS','O_NEG','A_POS','A_NEG','B_POS','B_NEG','AB_POS','AB_NEG'] as const;
 const BLOOD_LABELS: Record<string, string> = {
@@ -26,6 +28,7 @@ interface FormState {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user, accessToken, updateUser } = useAuthStore();
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -34,6 +37,17 @@ export default function OnboardingPage() {
     weightKg: 65, dateOfBirth: '',
     city: '', state: '', lat: '', lon: '',
   });
+
+  // Auto-fill Google-provided name details
+  useEffect(() => {
+    if (user) {
+      setForm(f => ({
+        ...f,
+        name: f.name || user.name || '',
+        phone: f.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -59,11 +73,54 @@ export default function OnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!form.name || !form.phone || !form.bloodType || !form.weightKg || !form.dateOfBirth || !form.city || !form.state) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+
     setIsSubmitting(true);
-    // In production: call donorsApi.createProfile + usersApi.updateMe
-    await new Promise(r => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    router.push('/dashboard');
+    try {
+      if (!accessToken) {
+        throw new Error('Access token is missing. Please log in again.');
+      }
+
+      // 1. Update basic user details (name, phone)
+      await usersApi.updateMe(accessToken, {
+        name: form.name,
+        phone: form.phone,
+      });
+
+      // 2. Create donor profile (with geo point coordinates fallback if geolocation denied)
+      const latNum = form.lat ? Number(form.lat) : 12.9716;
+      const lonNum = form.lon ? Number(form.lon) : 77.5946;
+
+      await donorsApi.createProfile(accessToken, {
+        bloodType: form.bloodType,
+        weightKg: Number(form.weightKg),
+        dateOfBirth: form.dateOfBirth,
+        city: form.city,
+        state: form.state,
+        location: {
+          lat: latNum,
+          lon: lonNum,
+        },
+      });
+
+      // 3. Update Zustand store
+      updateUser({
+        name: form.name,
+        phone: form.phone,
+        isProfileComplete: true,
+      });
+
+      // 4. Redirect to dashboard
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error('Onboarding submission failed:', err);
+      alert(err.message || 'Failed to save onboarding details. Please ensure all data is valid.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

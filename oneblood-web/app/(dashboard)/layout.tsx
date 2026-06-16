@@ -1,14 +1,16 @@
+'use client';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
+import { useAuthStore } from '@/store/auth.store';
 
-// In real app: session from httpOnly cookie via server-side fetch
-// For now, we render with placeholder session data
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuthStore();
+
   return (
     <div style={{ display: 'flex', height: '100vh', background: 'var(--surface-0)' }}>
-      <Sidebar unreadCount={3} />
+      <Sidebar unreadCount={3} isAdmin={user?.role === 'ADMIN'} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Navbar userName="User" userRole="DONOR" />
+        <Navbar userName={user?.name || 'User'} userRole={user?.role || 'DONOR'} />
         <main style={{
           flex: 1, overflowY: 'auto', padding: 28,
           background: 'var(--surface-0)',
@@ -21,3 +23,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

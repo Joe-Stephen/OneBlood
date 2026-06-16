@@ -5,6 +5,7 @@ export interface User {
   role: 'DONOR' | 'REQUESTER' | 'ADMIN';
   googleId: string;
   isProfileComplete: boolean;
+  phone?: string;
 }
 
 export interface BloodRequest {
