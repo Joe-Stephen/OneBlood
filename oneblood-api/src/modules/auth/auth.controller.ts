@@ -73,6 +73,52 @@ export class AuthController {
     }
   };
 
+  sendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { email, name } = req.body as { email: string; name?: string };
+      await this.authService.sendOtp(email, name);
+      res.status(200).json(success(null, 'OTP sent successfully'));
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { email, code } = req.body as { email: string; code: string };
+      const { tokens, user, isProfileComplete } = await this.authService.verifyOtp(email, code);
+
+      // Set httpOnly cookies
+      const isProd = appConfig.NODE_ENV === 'production';
+      res.cookie('access_token', tokens.accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'strict',
+        maxAge: tokens.expiresIn * 1000,
+      });
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
+      res.cookie('user_role', user.role, {
+        secure: isProd,
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
+
+      res.status(200).json(success({
+        accessToken:  tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn:    tokens.expiresIn,
+        user:         { ...user, isProfileComplete },
+      }));
+    } catch (err) {
+      next(err);
+    }
+  };
+
   refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies?.refresh_token ?? (req.body as { refreshToken?: string }).refreshToken;

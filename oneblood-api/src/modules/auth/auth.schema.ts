@@ -12,3 +12,17 @@ export const RefreshTokenSchema = z.object({
     refreshToken: z.string().optional(),
   }),
 });
+
+export const SendOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    name:  z.string().min(1).max(100).optional(),
+  }),
+});
+
+export const VerifyOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    code:  z.string().length(6),
+  }),
+});

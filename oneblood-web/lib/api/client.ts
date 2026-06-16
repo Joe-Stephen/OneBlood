@@ -63,6 +63,10 @@ export const authApi = {
     apiFetch('/v1/auth/refresh', { method: 'POST' }),
   logout: (token: string) =>
     apiFetch('/v1/auth/logout', { method: 'POST', token }),
+  sendOtp: (email: string, name?: string) =>
+    apiFetch<{ success: boolean; message: string }>('/v1/auth/otp/send', { method: 'POST', body: { email, name } }),
+  verifyOtp: (email: string, code: string) =>
+    apiFetch<{ success: boolean; data: any }>('/v1/auth/otp/verify', { method: 'POST', body: { email, code } }),
 };
 
 // ─── Users ────────────────────────────────────────────────────────────────────

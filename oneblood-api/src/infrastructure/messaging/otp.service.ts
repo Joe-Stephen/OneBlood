@@ -19,6 +19,8 @@ export class OtpService {
     const otp = this.generate();
     const key = this.cacheKey(purpose, identifier);
 
+    console.log(`[OTP] Generated verification code for ${identifier}: ${otp}`);
+
     // Store hashed OTP in Redis
     const hashed = crypto.createHash('sha256').update(otp).digest('hex');
     await this.cache.set(key, hashed, OTP_TTL_SECONDS);

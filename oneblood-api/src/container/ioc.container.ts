@@ -70,7 +70,7 @@ const notificationsRepo = new NotificationsRepository(db);
 const adminRepo         = new AdminRepository(db);
 
 // Services
-const authService          = new AuthService(authRepo, cache);
+const authService          = new AuthService(authRepo, cache, otpService);
 const usersService         = new UsersService(usersRepo);
 const donorsService        = new DonorsService(donorsRepo);
 const requestsService      = new RequestsService(requestsRepo, donorsRepo, matchingEngine);
