@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/client';
+import type { ApiResponse, User } from '@/types';
 
 export function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, setAuth, clearAuth, setLoading } = useAuthStore();
@@ -18,7 +19,7 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
         const { accessToken } = await res.json();
 
         // Fetch user info using the retrieved access token
-        const userRes = await usersApi.getMe(accessToken) as { success: boolean; data: any };
+        const userRes = await usersApi.getMe(accessToken) as ApiResponse<User>;
         if (userRes.success && userRes.data) {
           setAuth(userRes.data, accessToken);
         } else {

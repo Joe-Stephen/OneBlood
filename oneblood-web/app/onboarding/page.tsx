@@ -41,6 +41,7 @@ export default function OnboardingPage() {
   // Auto-fill Google-provided name details
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm(f => ({
         ...f,
         name: f.name || user.name || '',
@@ -115,9 +116,10 @@ export default function OnboardingPage() {
 
       // 4. Redirect to dashboard
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Onboarding submission failed:', err);
-      alert(err.message || 'Failed to save onboarding details. Please ensure all data is valid.');
+      const message = err instanceof Error ? err.message : 'Failed to save onboarding details. Please ensure all data is valid.';
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }

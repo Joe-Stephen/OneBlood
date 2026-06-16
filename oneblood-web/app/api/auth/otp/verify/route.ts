@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
     const raw = await res.text();
     if (!res.ok) {
       console.error('[OTP Verify Route] API error:', res.status, raw);
-      let parsedErr: any = { error: { message: 'Verification failed' } };
+      let parsedErr: { error?: { message?: string } } = { error: { message: 'Verification failed' } };
       try {
-        parsedErr = JSON.parse(raw);
+        parsedErr = JSON.parse(raw) as { error?: { message?: string } };
       } catch {}
       return NextResponse.json(
         { success: false, error: parsedErr.error?.message || 'Verification failed' },
@@ -77,10 +77,11 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (err: any) {
-    console.error('[OTP Verify Route] Unexpected error:', err);
+  } catch (err) {
+    const error = err as Error;
+    console.error('[OTP Verify Route] Unexpected error:', error);
     return NextResponse.json(
-      { success: false, error: err.message || 'Internal server error' },
+      { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
     );
   }

@@ -11,7 +11,10 @@ export function usePolling(
   { interval = 30_000, enabled = true }: UsePollingOptions = {},
 ) {
   const savedFn = useRef(fn);
-  savedFn.current = fn;
+
+  useEffect(() => {
+    savedFn.current = fn;
+  }, [fn]);
 
   const execute = useCallback(() => {
     void savedFn.current();

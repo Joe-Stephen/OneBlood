@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/store/auth.store';
 import { useNotificationStore } from '@/store/notification.store';
@@ -11,7 +11,6 @@ let socket: Socket | null = null;
 export function useSocket() {
   const { accessToken, isAuthenticated } = useAuthStore();
   const { setUnreadCount } = useNotificationStore();
-  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !accessToken) return;
@@ -26,14 +25,12 @@ export function useSocket() {
       });
     }
 
-    socketRef.current = socket;
-
-    socket.on('notification:new', (_data: unknown) => {
+    socket.on('notification:new', () => {
       // Increment unread count on new notification
       setUnreadCount(useNotificationStore.getState().unreadCount + 1);
     });
 
-    socket.on('request:updated', (_data: unknown) => {
+    socket.on('request:updated', () => {
       // Could trigger a query invalidation here
     });
 
@@ -43,5 +40,5 @@ export function useSocket() {
     };
   }, [isAuthenticated, accessToken, setUnreadCount]);
 
-  return socketRef.current;
+  return socket;
 }

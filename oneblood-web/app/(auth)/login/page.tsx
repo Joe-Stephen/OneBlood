@@ -59,9 +59,10 @@ export default function LoginPage() {
       await authApi.sendOtp(email, isSignUp ? name : undefined);
       setIsOtpSent(true);
       setTimer(60); // 1-minute resend cooldown
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to send OTP:', err);
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      const message = err instanceof Error ? err.message : 'Failed to send OTP. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -94,9 +95,10 @@ export default function LoginPage() {
 
       // Redirect accordingly
       router.push(json.data.user.isProfileComplete ? '/dashboard' : '/onboarding');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Verification error:', err);
-      setError(err.message || 'Invalid verification code.');
+      const message = err instanceof Error ? err.message : 'Invalid verification code.';
+      setError(message);
     } finally {
       setLoading(false);
     }

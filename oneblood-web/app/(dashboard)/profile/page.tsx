@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi, donorsApi, ApiError } from '@/lib/api/client';
+import type { ApiResponse, User } from '@/types';
 
 const BLOOD_TYPES = ['O_POS','O_NEG','A_POS','A_NEG','B_POS','B_NEG','AB_POS','AB_NEG'];
 const BLOOD_LABELS: Record<string, string> = {
@@ -10,11 +11,32 @@ const BLOOD_LABELS: Record<string, string> = {
   B_POS:'B+', B_NEG:'B−', AB_POS:'AB+', AB_NEG:'AB−',
 };
 
+interface DBProfile {
+  id: string;
+  user_id: string;
+  blood_type: string;
+  weight_kg: number;
+  date_of_birth: string | Date;
+  city: string;
+  state: string;
+  availability_status: string;
+  next_eligible_date: string | Date | null;
+  is_eligible: boolean;
+  created_at: string;
+}
+
+interface EligibilityInfo {
+  isEligible: boolean;
+  availabilityStatus: string;
+  nextEligibleDate: string | Date | null;
+  cooldownDaysRemaining: number;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const { accessToken, user, updateUser } = useAuthStore();
-  const [profile, setProfile] = useState<any>(null);
-  const [eligibility, setEligibility] = useState<any>(null);
+  const [profile, setProfile] = useState<DBProfile | null>(null);
+  const [eligibility, setEligibility] = useState<EligibilityInfo | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,19 +61,19 @@ export default function ProfilePage() {
         
         // 1. Fetch user (critical)
         try {
-          const userRes = await usersApi.getMe(accessToken) as any;
+          const userRes = await usersApi.getMe(accessToken) as ApiResponse<User>;
           if (userRes.success && userRes.data) {
             setName(userRes.data.name || '');
             setPhone(userRes.data.phone || '');
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error('Failed to load user details:', err);
           throw err;
         }
 
         // 2. Fetch profile (optional, might be 404)
         try {
-          const profileRes = await donorsApi.getProfile(accessToken) as any;
+          const profileRes = await donorsApi.getProfile(accessToken) as ApiResponse<DBProfile>;
           if (profileRes.success && profileRes.data) {
             setProfile(profileRes.data);
             setSelectedBloodType(profileRes.data.blood_type || 'O_POS');
@@ -69,7 +91,7 @@ export default function ProfilePage() {
             
             setAvailability(profileRes.data.availability_status === 'ACTIVE');
           }
-        } catch (err: any) {
+        } catch (err) {
           if (err instanceof ApiError && err.status === 404) {
             console.log('No donor profile found for this user.');
           } else {
@@ -79,20 +101,21 @@ export default function ProfilePage() {
 
         // 3. Fetch eligibility (optional, might be 404)
         try {
-          const eligibilityRes = await donorsApi.getEligibility(accessToken) as any;
+          const eligibilityRes = await donorsApi.getEligibility(accessToken) as ApiResponse<EligibilityInfo>;
           if (eligibilityRes.success && eligibilityRes.data) {
             setEligibility(eligibilityRes.data);
           }
-        } catch (err: any) {
+        } catch (err) {
           if (err instanceof ApiError && err.status === 404) {
             console.log('No eligibility data found.');
           } else {
             console.error('Failed to load eligibility details:', err);
           }
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error during data loading:', err);
-        setError(err.message || 'Failed to load details.');
+        const message = err instanceof Error ? err.message : 'Failed to load details.';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -129,7 +152,7 @@ export default function ProfilePage() {
             lat: latNum,
             lon: lonNum,
           },
-        }) as any;
+        }) as ApiResponse<DBProfile>;
 
         if (newProfile?.success && newProfile?.data) {
           setProfile(newProfile.data);
@@ -145,7 +168,7 @@ export default function ProfilePage() {
           weightKg: Number(weight),
           city,
           state,
-        }) as any;
+        }) as ApiResponse<DBProfile>;
 
         if (updatedProfile?.success && updatedProfile?.data) {
           setProfile(updatedProfile.data);
@@ -155,9 +178,10 @@ export default function ProfilePage() {
         updateUser({ name, phone });
         alert('Profile updated successfully!');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to save profile changes:', err);
-      alert(err.message || 'Failed to save changes.');
+      const message = err instanceof Error ? err.message : 'Failed to save changes.';
+      alert(message);
     } finally {
       setSaving(false);
     }
@@ -177,10 +201,10 @@ export default function ProfilePage() {
         availabilityStatus: nextVal ? 'ACTIVE' : 'INACTIVE',
       });
       
-      setEligibility((prev: any) =>
+      setEligibility((prev) =>
         prev ? { ...prev, availabilityStatus: nextVal ? 'ACTIVE' : 'INACTIVE' } : null
       );
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to update availability status:', err);
       setAvailability(!nextVal); // Revert
       alert('Failed to update availability status.');
@@ -198,9 +222,10 @@ export default function ProfilePage() {
       await fetch('/api/auth/logout', { method: 'POST' });
       useAuthStore.getState().clearAuth();
       router.push('/login');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to delete account:', err);
-      alert(err.message || 'Failed to delete account.');
+      const message = err instanceof Error ? err.message : 'Failed to delete account.';
+      alert(message);
     }
   };
 

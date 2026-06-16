@@ -29,7 +29,7 @@ export class TwilioAdapter implements IMessageSender {
     //   to,
     //   body: `Your OneBlood verification code: ${otp}. Valid for ${expiresInMinutes} min. Do not share.`,
     // });
-    console.log(`[TwilioAdapter] sendOtp → ${to} | OTP: ${otp} (stub — not sent)`);
+    console.log(`[TwilioAdapter] sendOtp → ${to} | OTP: ${otp} | Expires: ${expiresInMinutes}m (stub — not sent)`);
   }
 
   async sendAlert({ to, body }: AlertPayload): Promise<void> {

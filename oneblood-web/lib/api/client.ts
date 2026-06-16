@@ -66,7 +66,7 @@ export const authApi = {
   sendOtp: (email: string, name?: string) =>
     apiFetch<{ success: boolean; message: string }>('/v1/auth/otp/send', { method: 'POST', body: { email, name } }),
   verifyOtp: (email: string, code: string) =>
-    apiFetch<{ success: boolean; data: any }>('/v1/auth/otp/verify', { method: 'POST', body: { email, code } }),
+    apiFetch<{ success: boolean; data: unknown }>('/v1/auth/otp/verify', { method: 'POST', body: { email, code } }),
 };
 
 // ─── Users ────────────────────────────────────────────────────────────────────
