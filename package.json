@@ -4,7 +4,7 @@
   "description": "OneBlood — Blood Donation Platform (monorepo root)",
   "private": true,
   "scripts": {
-    "dev":      "concurrently --names \"API,WEB\" --prefix-colors \"red,blue\" \"npm run dev --prefix oneblood-api\" \"npm run dev --prefix oneblood-web\"",
+    "dev":      "concurrently --names \"API,WEB\" --prefix-colors \"green,blue\" \"npm run dev --prefix oneblood-api\" \"npm run dev --prefix oneblood-web\"",
     "dev:api":  "npm run dev --prefix oneblood-api",
     "dev:web":  "npm run dev --prefix oneblood-web",
     "build":    "npm run build --prefix oneblood-api && npm run build --prefix oneblood-web",
