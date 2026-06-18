@@ -1,0 +1,27 @@
+name: OneBlood CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # ── Backend: trigger Koyeb redeploy via deploy hook ────────────────────────
+  deploy-api:
+    name: Deploy API → Koyeb
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Koyeb deploy hook
+        run: |
+          curl --fail -s -X POST "${{ secrets.KOYEB_DEPLOY_HOOK }}"
+          echo "✅ Koyeb deploy triggered"
+
+  # ── Frontend: Vercel auto-deploys via its GitHub App ───────────────────────
+  #    Nothing to do here — Vercel watches the repo and deploys automatically.
+  #    This job just logs confirmation for visibility in the Actions tab.
+  deploy-web:
+    name: Deploy Web → Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vercel deploys automatically
+        run: echo "✅ Vercel GitHub App will auto-deploy oneblood-web"
