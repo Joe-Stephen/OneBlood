@@ -11,10 +11,14 @@ import { routes } from './container/ioc.container';
 export function createApp() {
   const app = express();
 
+  // Parse CORS_ORIGIN — supports comma-separated list of origins
+  const corsOrigins = appConfig.CORS_ORIGIN.split(',').map(o => o.trim());
+  const corsOrigin = corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins;
+
   // Security
   app.use(helmet());
   app.use(cors({
-    origin:      appConfig.CORS_ORIGIN,
+    origin:      corsOrigin,
     credentials: true,
     methods:     ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   }));

@@ -16,9 +16,12 @@ export function createSocketGateway(
   cache: RedisCache,
   pubsub: RedisPubSub,
 ): SocketServer {
+  const corsOrigins = appConfig.CORS_ORIGIN.split(',').map(o => o.trim());
+  const corsOrigin = corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins;
+
   const io = new SocketServer(httpServer, {
     cors: {
-      origin:      appConfig.CORS_ORIGIN,
+      origin:      corsOrigin,
       credentials: true,
     },
     transports: ['websocket', 'polling'],

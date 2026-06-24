@@ -7,7 +7,7 @@ const schema = z.object({
   JWT_EXPIRES_IN:        z.string().default('1h'),
   JWT_REFRESH_SECRET:    z.string().min(32),
   JWT_REFRESH_EXPIRES_IN:z.string().default('30d'),
-  CORS_ORIGIN:  z.string().default('http://localhost:3001'),
+  CORS_ORIGIN:  z.string().default('http://localhost:3001'),  // comma-separated list of allowed origins
   RATE_LIMIT_WINDOW_MS:      z.coerce.number().default(60_000),
   RATE_LIMIT_MAX_REQUESTS:   z.coerce.number().default(100),
   GOOGLE_CLIENT_ID:     z.string().default(''),
