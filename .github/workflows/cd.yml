@@ -6,15 +6,15 @@ on:
       - main
 
 jobs:
-  # ── Backend: trigger Koyeb redeploy via deploy hook ────────────────────────
+  # ── Backend: trigger Render redeploy via deploy hook ───────────────────────
   deploy-api:
-    name: Deploy API → Koyeb
+    name: Deploy API → Render
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Koyeb deploy hook
+      - name: Trigger Render deploy hook
         run: |
-          curl --fail -s -X POST "${{ secrets.KOYEB_DEPLOY_HOOK }}"
-          echo "✅ Koyeb deploy triggered"
+          curl --fail -s -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo "✅ Render deploy triggered"
 
   # ── Frontend: Vercel auto-deploys via its GitHub App ───────────────────────
   #    Nothing to do here — Vercel watches the repo and deploys automatically.
