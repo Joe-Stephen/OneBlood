@@ -7,14 +7,22 @@ export class RedisPubSub {
   readonly subscriber: Redis;
 
   constructor() {
-    const opts = {
-      host:     redisConfig.REDIS_HOST,
-      port:     redisConfig.REDIS_PORT,
-      password: redisConfig.REDIS_PASSWORD,
-      lazyConnect: true,
-    };
-    this.publisher  = new Redis(opts);
-    this.subscriber = new Redis(opts);
+    if (redisConfig.REDIS_URL) {
+      // Upstash / managed Redis — URL already contains TLS (rediss://)
+      const tlsOpts = { lazyConnect: true, tls: {} };
+      this.publisher  = new Redis(redisConfig.REDIS_URL, tlsOpts);
+      this.subscriber = new Redis(redisConfig.REDIS_URL, tlsOpts);
+    } else {
+      // Local development — use individual vars (no TLS)
+      const opts = {
+        host:        redisConfig.REDIS_HOST,
+        port:        redisConfig.REDIS_PORT,
+        password:    redisConfig.REDIS_PASSWORD,
+        lazyConnect: true,
+      };
+      this.publisher  = new Redis(opts);
+      this.subscriber = new Redis(opts);
+    }
   }
 
   async publish(channel: string, message: unknown): Promise<void> {
